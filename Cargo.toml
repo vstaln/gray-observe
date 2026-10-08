@@ -1,0 +1,17 @@
+[package]
+name = "gray-observe"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.91"
+license = "MIT"
+description = "Local turn/tool telemetry: JSONL event log under ~/.gray/observe with /observe stats."
+
+[[bin]]
+name = "gray-observe"
+path = "src/main.rs"
+
+[dependencies]
+serde_json = "1"
+
+[profile.release]
+strip = true
