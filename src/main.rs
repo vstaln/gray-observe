@@ -1,8 +1,7 @@
 //! gray-observe — local turn telemetry, no external service.
 //!
-//! Port of the *local* half of hermes' `observability/langfuse` plugin:
-//! instead of shipping spans to Langfuse, every event lands as one JSON line
-//! in `~/.gray/observe/<YYYY-MM-DD>.jsonl`:
+//! Every host event lands as one JSON line in
+//! `~/.gray/observe/<YYYY-MM-DD>.jsonl`:
 //!
 //! - `pre_tool`   → `{type, ts, session, tool, args_len}`
 //! - `post_tool`  → `{type, ts, session, tool, is_error, content_len}`
