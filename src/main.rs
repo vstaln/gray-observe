@@ -27,6 +27,7 @@ fn manifest() -> Value {
         "tools": [],
         "description": "log turns and tools to a local jsonl file",
         "commands": ["/observe"],
+        "command_descriptions": {"/observe": "summarize local turn and tool telemetry"},
     })
 }
 
