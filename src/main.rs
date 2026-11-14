@@ -25,7 +25,7 @@ fn manifest() -> Value {
         "version": env!("CARGO_PKG_VERSION"),
         "protocol": "1.1",
         "tools": [],
-        "description": "log",
+        "description": "log turns and tools to a local jsonl file",
         "commands": ["/observe"],
     })
 }
