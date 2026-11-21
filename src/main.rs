@@ -66,7 +66,11 @@ fn utc_date(secs: u64) -> String {
     let y = yoe + era * 400;
     let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
     let mp = (5 * doy + 2) / 153;
-    let (m, y) = if mp < 10 { (mp + 3, y) } else { (mp - 9, y + 1) };
+    let (m, y) = if mp < 10 {
+        (mp + 3, y)
+    } else {
+        (mp - 9, y + 1)
+    };
     let d = doy - (153 * mp + 2) / 5 + 1;
     format!("{y:04}-{m:02}-{d:02}")
 }
@@ -149,7 +153,9 @@ fn stats(lines: &[String]) -> Stats {
         tools: Default::default(),
     };
     for line in lines {
-        let Ok(v) = serde_json::from_str::<Value>(line) else { continue };
+        let Ok(v) = serde_json::from_str::<Value>(line) else {
+            continue;
+        };
         match v.get("type").and_then(Value::as_str) {
             Some("pre_tool") => {
                 s.calls += 1;
@@ -185,7 +191,14 @@ fn run_command(dir: &Path, date: &str, argv: &[&str]) -> String {
             if lines.is_empty() {
                 return format!("nothing logged for {date} yet");
             }
-            lines.iter().rev().take(n).rev().cloned().collect::<Vec<_>>().join("\n")
+            lines
+                .iter()
+                .rev()
+                .take(n)
+                .rev()
+                .cloned()
+                .collect::<Vec<_>>()
+                .join("\n")
         }
         _ => {
             let lines = read_lines(&path);
@@ -308,16 +321,19 @@ mod tests {
     #[test]
     fn event_line_shapes() {
         let pre = event_line(&json!({"type":"pre_tool","name":"bash",
-            "args":{"command":"ls"},"session":{"id":"s1"}})).unwrap();
+            "args":{"command":"ls"},"session":{"id":"s1"}}))
+        .unwrap();
         let v: Value = serde_json::from_str(&pre).unwrap();
         assert_eq!(v["tool"], "bash");
         assert!(v["args_len"].as_u64().unwrap() > 0);
         let post = event_line(&json!({"type":"post_tool","name":"read",
-            "content":"abc","is_error":true,"session":{}})).unwrap();
+            "content":"abc","is_error":true,"session":{}}))
+        .unwrap();
         let v: Value = serde_json::from_str(&post).unwrap();
         assert_eq!(v["is_error"], true);
         assert_eq!(v["content_len"], 3);
-        let end = event_line(&json!({"type":"turn_end","usage":{"total":42},"session":{}})).unwrap();
+        let end =
+            event_line(&json!({"type":"turn_end","usage":{"total":42},"session":{}})).unwrap();
         let v: Value = serde_json::from_str(&end).unwrap();
         assert_eq!(v["usage"]["total"], 42);
         assert!(event_line(&json!({"type":"other"})).is_none());
@@ -328,16 +344,35 @@ mod tests {
         let dir = tmpdir("app");
         let date = "1999-01-01";
         let s = json!({"id":"s1"});
-        notify(&dir, json!({"type":"pre_tool","name":"bash","args":{},"session":s}));
-        notify(&dir, json!({"type":"post_tool","name":"bash","content":"ok","is_error":false,"session":s}));
-        notify(&dir, json!({"type":"turn_end","usage":{"total":10},"session":s}));
+        notify(
+            &dir,
+            json!({"type":"pre_tool","name":"bash","args":{},"session":s}),
+        );
+        notify(
+            &dir,
+            json!({"type":"post_tool","name":"bash","content":"ok","is_error":false,"session":s}),
+        );
+        notify(
+            &dir,
+            json!({"type":"turn_end","usage":{"total":10},"session":s}),
+        );
         // events land under today(); the stats test below uses a fixed date.
         let file = dir.join(format!("{}.jsonl", today()));
         assert_eq!(read_lines(&file).len(), 3);
 
-        append_line(&dir, date, r#"{"type":"pre_tool","tool":"bash","ts":1,"session":""}"#).unwrap();
+        append_line(
+            &dir,
+            date,
+            r#"{"type":"pre_tool","tool":"bash","ts":1,"session":""}"#,
+        )
+        .unwrap();
         append_line(&dir, date, r#"{"type":"post_tool","tool":"bash","is_error":true,"content_len":2,"ts":1,"session":""}"#).unwrap();
-        append_line(&dir, date, r#"{"type":"turn_end","usage":{},"ts":1,"session":""}"#).unwrap();
+        append_line(
+            &dir,
+            date,
+            r#"{"type":"turn_end","usage":{},"ts":1,"session":""}"#,
+        )
+        .unwrap();
         let out = cmd(&dir, date, &[]);
         assert!(out.contains("1 turn(s)"));
         assert!(out.contains("1 tool call(s)"));
